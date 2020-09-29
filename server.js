@@ -57,6 +57,16 @@ app.post('/register', (req, res) => {
     })
 })
 
+app.get('/users', (req, res) => {
+    User.find((error, data) => {
+        if (error) {
+            res.status(500).send(error)
+        } else {
+            res.status(201).send(data)
+        }
+    })
+})
+
 
 app.post('/chat', async (req, res) => {
     const dbChat = req.body
@@ -274,7 +284,10 @@ db.once('open', () => {
                 message: chat.message,
                 timestamp: chat.timestamp,
             })
-        } else {
+        } else if (change.operationType === 'insert') {
+            pusher.trigger('chats', 'inserted', 'newChat')
+        }
+        else {
             console.log("Error triggering pusher.")
         }
     })
